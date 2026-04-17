@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>عرض بيانات العملاء</title>
+
+    <style>
+        body {
+            font-family: "Cairo", Arial;
+            background: #f5f5f5;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 95%;
+            margin: auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 300px;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            text-align: right;
+        }
+
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        .excel {
+            background: #28a745;
+            color: white;
+        }
+
+        .home {
+            background: #007bff;
+            color: white;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background: #f0f0f0;
+        }
+
+        tr:hover {
+            background: #fafafa;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>📋 بيانات العملاء</h2>
+
+    <input type="text" id="search" placeholder="ابحث برقم التليفون 🔍" onkeyup="searchData()">
+
+    <br>
+
+    <button class="excel" onclick="downloadExcel()">تحميل Excel 📥</button>
+    <button class="home" onclick="goHome()">إضافة عميل ➕</button>
+
+    <table>
+        <thead>
+            <tr>
+                <th>اسم العميل</th>
+                <th>التليفون</th>
+                <th>العنوان</th>
+                <th>الوظيفة</th>
+                <th>اسم الشركة</th>
+                <th>تاريخ العملية</th>
+                <th>الابلكيشن</th>
+                <th>مبلغ السحب</th>
+            </tr>
+        </thead>
+
+        <tbody id="tableBody"></tbody>
+    </table>
+</div>
+
+<script>
+
+// تحميل البيانات
+function loadData(data = null) {
+    let customers = data || JSON.parse(localStorage.getItem("customers")) || [];
+
+    let table = document.getElementById("tableBody");
+    table.innerHTML = "";
+
+    customers.forEach(c => {
+        table.innerHTML += `
+            <tr>
+                <td>${c.name || ""}</td>
+                <td>${c.phone || ""}</td>
+                <td>${c.address || ""}</td>
+                <td>${c.job || ""}</td>
+                <td>${c.company || ""}</td>
+                <td>${c.date || ""}</td>
+                <td>${c.app || ""}</td>
+                <td>${c.amount || ""}</td>
+            </tr>
+        `;
+    });
+}
+
+// البحث برقم التليفون
+function searchData() {
+    let value = document.getElementById("search").value;
+    let customers = JSON.parse(localStorage.getItem("customers")) || [];
+
+    let filtered = customers.filter(c =>
+        (c.phone || "").includes(value)
+    );
+
+    loadData(filtered);
+}
+
+// تحميل Excel
+function downloadExcel() {
+    let customers = JSON.parse(localStorage.getItem("customers")) || [];
+
+    let csv = "اسم العميل,التليفون,العنوان,الوظيفة,الشركة,التاريخ,الابلكيشن,المبلغ\n";
+
+    customers.forEach(c => {
+        csv += `${c.name},${c.phone},${c.address},${c.job},${c.company},${c.date},${c.app},${c.amount}\n`;
+    });
+
+    let blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    let url = URL.createObjectURL(blob);
+
+    let a = document.createElement("a");
+    a.href = url;
+    a.download = "customers.csv";
+    a.click();
+}
+
+// الرجوع للصفحة الأولى
+function goHome() {
+    window.location.href = "home.html";
+}
+
+// أول تحميل
+window.onload = loadData;
+
+</script>
+
+</body>
+</html>
