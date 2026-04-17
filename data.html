@@ -6,7 +6,7 @@
 
     <style>
         body {
-            font-family: "Cairo", Arial;
+            font-family: Arial;
             background: #f5f5f5;
             padding: 30px;
             text-align: center;
@@ -21,25 +21,27 @@
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
 
-        h2 {
-            margin-bottom: 20px;
-        }
-
         input {
             width: 300px;
             padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            text-align: right;
+            margin-bottom: 10px;
         }
 
         button {
-            padding: 10px 15px;
+            padding: 8px 12px;
             border: none;
-            border-radius: 5px;
             cursor: pointer;
-            margin: 5px;
+            margin: 2px;
+            border-radius: 5px;
+        }
+
+        .edit {
+            background: #ffc107;
+        }
+
+        .delete {
+            background: #dc3545;
+            color: white;
         }
 
         .excel {
@@ -60,16 +62,12 @@
 
         th, td {
             border: 1px solid #ddd;
-            padding: 10px;
+            padding: 8px;
             text-align: center;
         }
 
         th {
-            background: #f0f0f0;
-        }
-
-        tr:hover {
-            background: #fafafa;
+            background: #eee;
         }
     </style>
 </head>
@@ -77,34 +75,39 @@
 <body>
 
 <div class="container">
+
     <h2>📋 بيانات العملاء</h2>
 
-    <input type="text" id="search" placeholder="ابحث برقم التليفون 🔍" onkeyup="searchData()">
+    <input type="text" id="search" placeholder="ابحث برقم التليفون" onkeyup="searchData()">
 
     <br>
 
-    <button class="excel" onclick="downloadExcel()">تحميل Excel 📥</button>
-    <button class="home" onclick="goHome()">إضافة عميل ➕</button>
+    <button class="excel" onclick="downloadExcel()">تحميل Excel</button>
+    <button class="home" onclick="goHome()">إضافة عميل</button>
 
     <table>
         <thead>
-            <tr>
-                <th>اسم العميل</th>
-                <th>التليفون</th>
-                <th>العنوان</th>
-                <th>الوظيفة</th>
-                <th>اسم الشركة</th>
-                <th>تاريخ العملية</th>
-                <th>الابلكيشن</th>
-                <th>مبلغ السحب</th>
-            </tr>
+        <tr>
+            <th>اسم</th>
+            <th>تليفون</th>
+            <th>عنوان</th>
+            <th>وظيفة</th>
+            <th>شركة</th>
+            <th>تاريخ</th>
+            <th>ابلكيشن</th>
+            <th>مبلغ</th>
+            <th>تحكم</th>
+        </tr>
         </thead>
 
         <tbody id="tableBody"></tbody>
     </table>
+
 </div>
 
 <script>
+
+let editIndex = null;
 
 // تحميل البيانات
 function loadData(data = null) {
@@ -113,7 +116,7 @@ function loadData(data = null) {
     let table = document.getElementById("tableBody");
     table.innerHTML = "";
 
-    customers.forEach(c => {
+    customers.forEach((c, index) => {
         table.innerHTML += `
             <tr>
                 <td>${c.name || ""}</td>
@@ -124,12 +127,53 @@ function loadData(data = null) {
                 <td>${c.date || ""}</td>
                 <td>${c.app || ""}</td>
                 <td>${c.amount || ""}</td>
+                <td>
+                    <button class="edit" onclick="editCustomer(${index})">تعديل</button>
+                    <button class="delete" onclick="deleteCustomer(${index})">حذف</button>
+                </td>
             </tr>
         `;
     });
 }
 
-// البحث برقم التليفون
+// حذف
+function deleteCustomer(index) {
+    let customers = JSON.parse(localStorage.getItem("customers")) || [];
+    customers.splice(index, 1);
+    localStorage.setItem("customers", JSON.stringify(customers));
+    loadData();
+}
+
+// فتح تعديل
+function editCustomer(index) {
+    let customers = JSON.parse(localStorage.getItem("customers")) || [];
+    let c = customers[index];
+
+    let newName = prompt("اسم العميل", c.name);
+    let newPhone = prompt("التليفون", c.phone);
+    let newAddress = prompt("العنوان", c.address);
+    let newJob = prompt("الوظيفة", c.job);
+    let newCompany = prompt("الشركة", c.company);
+    let newDate = prompt("التاريخ", c.date);
+    let newApp = prompt("الابلكيشن", c.app);
+    let newAmount = prompt("المبلغ", c.amount);
+
+    customers[index] = {
+        name: newName,
+        phone: newPhone,
+        address: newAddress,
+        job: newJob,
+        company: newCompany,
+        date: newDate,
+        app: newApp,
+        amount: newAmount
+    };
+
+    localStorage.setItem("customers", JSON.stringify(customers));
+    loadData();
+}
+
+// بحث
 function searchData() {
     let value = document.getElementById("search").value;
     let customers = JSON.parse(localStorage.getItem("customers")) || [];
@@ -141,17 +185,23 @@ function searchData() {
     loadData(filtered);
 }
 
-// تحميل Excel
+// Excel
+
 function downloadExcel() {
     let customers = JSON.parse(localStorage.getItem("customers")) || [];
 
-    let csv = "اسم العميل,التليفون,العنوان,الوظيفة,الشركة,التاريخ,الابلكيشن,المبلغ\n";
+    let csv = "\uFEFF"; // 👈 أهم سطر لحل مشكلة العربي
+
+    csv += "اسم العميل,التليفون,العنوان,الوظيفة,الشركة,التاريخ,الابلكيشن,المبلغ\n";
 
     customers.forEach(c => {
-        csv += `${c.name},${c.phone},${c.address},${c.job},${c.company},${c.date},${c.app},${c.amount}\n`;
+        csv += `${c.name || ""},${c.phone || ""},${c.address || ""},${c.job || ""},${c.company || ""},${c.date || ""},${c.app || ""},${c.amount || ""}\n`;
     });
 
-    let blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    let blob = new Blob([csv], {
+        type: "text/csv;charset=utf-8;"
+    });
+
     let url = URL.createObjectURL(blob);
 
     let a = document.createElement("a");
@@ -160,9 +210,9 @@ function downloadExcel() {
     a.click();
 }
 
-// الرجوع للصفحة الأولى
+// رجوع
 function goHome() {
-    window.location.href = "home.html";
+    window.location.href = "index.html";
 }
 
 // أول تحميل
