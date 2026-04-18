@@ -1,150 +1,150 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <title>عرض بيانات العملاء</title>
+<meta charset="UTF-8">
+<title>بيانات العملاء</title>
 
-    <style>
-        body {
-            font-family: Arial;
-            background: #f5f5f5;
-            padding: 30px;
-            text-align: center;
-        }
+<style>
+body {
+    font-family: Arial;
+    background: #f5f5f5;
+    padding: 20px;
+    text-align: center;
+}
 
-        .container {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            width: 95%;
-            margin: auto;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
+.container {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 98%;
+    margin: auto;
+}
 
-        input {
-            width: 300px;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
+input {
+    padding: 8px;
+    width: 250px;
+    margin-bottom: 10px;
+}
 
-        button {
-            padding: 8px 12px;
-            border: none;
-            cursor: pointer;
-            margin: 2px;
-            border-radius: 5px;
-        }
+button {
+    padding: 6px 10px;
+    margin: 3px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
 
-        .edit {
-            background: #ffc107;
-        }
+.edit { background: orange; }
+.delete { background: red; color: white; }
+.excel { background: green; color: white; }
+.home { background: blue; color: white; }
+.show { background: #007bff; color: white; }
 
-        .delete {
-            background: #dc3545;
-            color: white;
-        }
+table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+}
 
-        .excel {
-            background: #28a745;
-            color: white;
-        }
+th, td {
+    border: 1px solid #ddd;
+    padding: 6px;
+}
 
-        .home {
-            background: #007bff;
-            color: white;
-        }
+th {
+    background: #eee;
+}
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
+textarea {
+    width: 120px;
+    height: 40px;
+}
+</style>
 
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: center;
-        }
-
-        th {
-            background: #eee;
-        }
-    </style>
 </head>
 
 <body>
 
 <div class="container">
 
-    <h2>📋 بيانات العملاء</h2>
+<h2>📋 بيانات العملاء</h2>
 
-    <input type="text" id="search" placeholder="ابحث برقم التليفون" onkeyup="searchData()">
+<input type="text" id="search" placeholder="بحث بالاسم أو التليفون" onkeyup="searchData()">
 
-    <br>
+<br>
 
-    <button class="excel" onclick="downloadExcel()">تحميل Excel</button>
-    <button class="home" onclick="goHome()">إضافة عميل</button>
+<button class="excel" onclick="downloadExcel()">تحميل Excel</button>
+<button class="home" onclick="goHome()">إضافة عميل</button>
+<button class="show" onclick="loadData()">عرض الكل</button>
 
-    <table>
-        <thead>
-        <tr>
-            <th>اسم</th>
-            <th>تليفون</th>
-            <th>عنوان</th>
-            <th>وظيفة</th>
-            <th>شركة</th>
-            <th>تاريخ</th>
-            <th>ابلكيشن</th>
-            <th>مبلغ</th>
-            <th>تحكم</th>
-        </tr>
-        </thead>
+<table>
+<thead>
+<tr>
+<th>اسم</th>
+<th>تليفون</th>
+<th>عنوان</th>
+<th>وظيفة</th>
+<th>شركة</th>
+<th>تاريخ</th>
+<th>ابلكيشن</th>
+<th>مبلغ</th>
+<th>ملحوظات</th>
+<th>الحالة</th>
+<th>تحكم</th>
+</tr>
+</thead>
 
-        <tbody id="tableBody"></tbody>
-    </table>
+<tbody id="tableBody"></tbody>
+
+</table>
 
 </div>
 
 <script>
 
-let editIndex = null;
-
 // تحميل البيانات
 function loadData(data = null) {
     let customers = data || JSON.parse(localStorage.getItem("customers")) || [];
-
     let table = document.getElementById("tableBody");
     table.innerHTML = "";
 
     customers.forEach((c, index) => {
+
         table.innerHTML += `
-            <tr>
-                <td>${c.name || ""}</td>
-                <td>${c.phone || ""}</td>
-                <td>${c.address || ""}</td>
-                <td>${c.job || ""}</td>
-                <td>${c.company || ""}</td>
-                <td>${c.date || ""}</td>
-                <td>${c.app || ""}</td>
-                <td>${c.amount || ""}</td>
-                <td>
-                    <button class="edit" onclick="editCustomer(${index})">تعديل</button>
-                    <button class="delete" onclick="deleteCustomer(${index})">حذف</button>
-                </td>
-            </tr>
+        <tr>
+            <td>${c.name || ""}</td>
+            <td>${c.phone || ""}</td>
+            <td>${c.address || ""}</td>
+            <td>${c.job || ""}</td>
+            <td>${c.company || ""}</td>
+            <td>${c.date || ""}</td>
+            <td>${c.app || ""}</td>
+            <td>${c.amount || ""}</td>
+
+            <td>
+                <textarea onchange="updateNote(${index}, this.value)">
+${c.note || ""}
+                </textarea>
+            </td>
+
+            <td>
+                <select onchange="updateStatus(${index}, this.value)">
+                    <option value="">-- اختر --</option>
+                    <option value="قبول" ${c.status === "قبول" ? "selected" : ""}>قبول</option>
+                    <option value="رفض" ${c.status === "رفض" ? "selected" : ""}>رفض</option>
+                </select>
+            </td>
+
+            <td>
+                <button class="edit" onclick="editCustomer(${index})">تعديل</button>
+                <button class="delete" onclick="deleteCustomer(${index})">حذف</button>
+            </td>
+        </tr>
         `;
     });
 }
 
-// حذف
-function deleteCustomer(index) {
-    let customers = JSON.parse(localStorage.getItem("customers")) || [];
-    customers.splice(index, 1);
-    localStorage.setItem("customers", JSON.stringify(customers));
-    loadData();
-}
-
-// فتح تعديل
+// تعديل (زي الأول)
 function editCustomer(index) {
     let customers = JSON.parse(localStorage.getItem("customers")) || [];
     let c = customers[index];
@@ -159,6 +159,7 @@ function editCustomer(index) {
     let newAmount = prompt("المبلغ", c.amount);
 
     customers[index] = {
+        ...customers[index],
         name: newName,
         phone: newPhone,
         address: newAddress,
@@ -173,35 +174,54 @@ function editCustomer(index) {
     loadData();
 }
 
-// بحث
+// حذف
+function deleteCustomer(index) {
+    let customers = JSON.parse(localStorage.getItem("customers")) || [];
+    customers.splice(index, 1);
+    localStorage.setItem("customers", JSON.stringify(customers));
+    loadData();
+}
+
+// تحديث الملحوظات
+function updateNote(index, value) {
+    let customers = JSON.parse(localStorage.getItem("customers")) || [];
+    customers[index].note = value;
+    localStorage.setItem("customers", JSON.stringify(customers));
+}
+
+// تحديث الحالة
+function updateStatus(index, value) {
+    let customers = JSON.parse(localStorage.getItem("customers")) || [];
+    customers[index].status = value;
+    localStorage.setItem("customers", JSON.stringify(customers));
+}
+
+// البحث
 function searchData() {
-    let value = document.getElementById("search").value;
+    let value = document.getElementById("search").value.toLowerCase();
     let customers = JSON.parse(localStorage.getItem("customers")) || [];
 
     let filtered = customers.filter(c =>
-        (c.phone || "").includes(value)
+        (c.name && c.name.toLowerCase().includes(value)) ||
+        (c.phone && c.phone.includes(value))
     );
 
     loadData(filtered);
 }
 
-// Excel
-
+// Excel (مع حل العربي)
 function downloadExcel() {
     let customers = JSON.parse(localStorage.getItem("customers")) || [];
 
-    let csv = "\uFEFF"; // 👈 أهم سطر لحل مشكلة العربي
+    let csv = "\uFEFF";
 
-    csv += "اسم العميل,التليفون,العنوان,الوظيفة,الشركة,التاريخ,الابلكيشن,المبلغ\n";
+    csv += "اسم العميل,التليفون,العنوان,الوظيفة,الشركة,التاريخ,الابلكيشن,المبلغ,ملحوظات,الحالة\n";
 
     customers.forEach(c => {
-        csv += `${c.name || ""},${c.phone || ""},${c.address || ""},${c.job || ""},${c.company || ""},${c.date || ""},${c.app || ""},${c.amount || ""}\n`;
+        csv += `${c.name},${c.phone},${c.address},${c.job},${c.company},${c.date},${c.app},${c.amount},${c.note || ""},${c.status || ""}\n`;
     });
 
-    let blob = new Blob([csv], {
-        type: "text/csv;charset=utf-8;"
-    });
-
+    let blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     let url = URL.createObjectURL(blob);
 
     let a = document.createElement("a");
@@ -215,7 +235,6 @@ function goHome() {
     window.location.href = "index.html";
 }
 
-// أول تحميل
 window.onload = loadData;
 
 </script>

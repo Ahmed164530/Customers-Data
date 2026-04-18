@@ -69,7 +69,9 @@
     <h2>إضافة عميل</h2>
 
     <input type="text" id="name" placeholder="اسم العميل">
-    <input type="text" id="phone" placeholder="رقم التليفون">
+    
+    <input type="text" id="phone" placeholder="رقم التليفون" inputmode="numeric" pattern="[0-9]*">
+    
     <input type="text" id="address" placeholder="العنوان">
     <input type="text" id="job" placeholder="الوظيفة">
     <input type="text" id="company" placeholder="اسم الشركة">
@@ -86,22 +88,44 @@
 
 <script>
 function saveCustomer() {
-    let customer = {
-        name: document.getElementById("name").value.trim(),
-        phone: document.getElementById("phone").value.trim(),
-        address: document.getElementById("address").value.trim(),
-        job: document.getElementById("job").value.trim(),
-        company: document.getElementById("company").value.trim(),
-        date: document.getElementById("date").value,
-        app: document.getElementById("app").value.trim(),
-        amount: document.getElementById("amount").value
-    };
 
-    // تحقق من الإدخال
-    if (!customer.name || !customer.phone) {
-        alert("لازم تدخل الاسم ورقم التليفون");
+    let name = document.getElementById("name").value.trim();
+    let phone = document.getElementById("phone").value.trim();
+    let address = document.getElementById("address").value.trim();
+    let job = document.getElementById("job").value.trim();
+    let company = document.getElementById("company").value.trim();
+    let date = document.getElementById("date").value;
+    let app = document.getElementById("app").value.trim();
+    let amount = document.getElementById("amount").value;
+
+    // تحقق إن كل الحقول متملية
+    if (!name || !phone || !address || !job || !company || !date || !app || !amount) {
+        alert("❌ لازم تملا كل البيانات");
         return;
     }
+
+    // تحقق إن التليفون أرقام فقط
+    if (!/^\d+$/.test(phone)) {
+        alert("❌ رقم التليفون لازم يكون أرقام فقط");
+        return;
+    }
+
+    // تحقق طول رقم التليفون (11 رقم)
+    if (phone.length !== 11) {
+        alert("❌ رقم التليفون لازم يكون 11 رقم");
+        return;
+    }
+
+    let customer = {
+        name,
+        phone,
+        address,
+        job,
+        company,
+        date,
+        app,
+        amount
+    };
 
     let customers = JSON.parse(localStorage.getItem("customers")) || [];
 
